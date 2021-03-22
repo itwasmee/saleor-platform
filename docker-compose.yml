@@ -1,6 +1,13 @@
 version: '2'
 
 services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+  
   api:
     ports:
       - 8000:8000
@@ -25,6 +32,7 @@ services:
     command: python manage.py runserver 0.0.0.0:8000
     env_file: common.env
     environment:
+      - VIRTUAL_HOST=51.83.99.88
       - JAEGER_AGENT_HOST=jaeger
       - STOREFRONT_URL=http://localhost:3000/
       - DASHBOARD_URL=http://localhost:9000/
@@ -32,7 +40,7 @@ services:
   storefront:
     build:
       context: ./saleor-storefront
-      dockerfile: ./Dockerfile.dev
+      dockerfile: ./Dockerfile
     ports:
       - 3000:3000
     restart: unless-stopped
@@ -44,7 +52,7 @@ services:
   dashboard:
     build:
       context: ./saleor-dashboard
-      dockerfile: ./Dockerfile.dev
+      dockerfile: ./Dockerfile
     ports:
       - 9000:9000
     restart: unless-stopped
